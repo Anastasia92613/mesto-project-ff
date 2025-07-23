@@ -1,17 +1,13 @@
-import { handlePopup } from "./modal.js";
-import { deletedCard, putLikeCard, deleteLikeCard } from "./api.js"
+import { putLikeCard, deleteLikeCard } from "./api.js"
 
 //создание карточки по шаблону
-export const createCard = (link, name, likes, cardId, userId, ownerId, deleteCard, hendlerLikeCard, openImage) => {
+export const createCard = (link, name, likes, cardId, userId, ownerId, openedPopupDeletedCard, hendlerLikeCard, openImage) => {
   const cardTemplate = document.querySelector('#card-template').content;
   const cardElement = cardTemplate.querySelector('.card').cloneNode(true);
   const buttonDelete = cardElement.querySelector('.card__delete-button');
   const buttonLike = cardElement.querySelector('.card__like-button');
   const countLike = cardElement.querySelector('.card__like-count');
   const cardImage = cardElement.querySelector('.card__image');
-  const deleteCardPopup = document.querySelector('.popup_type_delete-card');
-  const popupClose = deleteCardPopup.querySelector('.popup__close');
-  let buttonConfirmationDelete;
 
   //Наполнение карточки
   cardElement.querySelector('.card__image').setAttribute('src', link);
@@ -31,18 +27,10 @@ export const createCard = (link, name, likes, cardId, userId, ownerId, deleteCar
     };
   });
   
-  //Открытие попапа удаления карточки
+  //Слушатель открытия попапа удаления карточки
   buttonDelete.addEventListener('click',function (evt) { 
     const deletedCard = evt.target.closest('.card');
-    const buttonDelete = deleteCardPopup.querySelector('.popup__button');
-   
-    handlePopup(deleteCardPopup, popupClose);
-
-    const handler = () => {
-      buttonConfirmationDelete = buttonDelete;
-      deleteCard(cardId, deletedCard, handler, buttonConfirmationDelete, deleteCardPopup, popupClose);
-    };
-    buttonDelete.addEventListener('click', handler);
+    openedPopupDeletedCard(cardId, deletedCard);
   });
 
   //Слушатель на кнопку лайка карточки
@@ -56,14 +44,6 @@ export const createCard = (link, name, likes, cardId, userId, ownerId, deleteCar
   });
 
   return cardElement;
-};
-
-//Удаление карточки
-export const deleteCard = (cardId, card, handler, buttonDelete, deleteCardPopup, popupClose) => {
-  buttonDelete.removeEventListener('click', handler);
-  handlePopup(deleteCardPopup, popupClose);
-  deletedCard(cardId);
-  card.remove();
 };
 
 //Лайк карточки

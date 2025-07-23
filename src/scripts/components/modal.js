@@ -1,9 +1,7 @@
-import { popupElements, clearValidation} from './validation';
-
 let currentContainer;
 let currentButtonClose;
 
-const closePopup = () => {
+export const closePopup = () => {
   currentContainer.classList.remove('popup_is-opened');
   currentContainer.classList.remove('popup_is-animated');
   document.removeEventListener('keydown', closePopupBuEsc); 
@@ -24,27 +22,13 @@ const closePopupByOverlay = (evt) => {
 };
 
 //Открытие и закрытие попапа
-export const handlePopup = (container, buttonClose) => {
+export const openPopup = (container, buttonClose) => {
   currentContainer = container;
   currentButtonClose = buttonClose;
-  const formElement = container.querySelector(popupElements.formSelector);
 
-  clearValidation(formElement, popupElements);
-
-  currentContainer.classList.toggle('popup_is-opened');
-  currentContainer.classList.toggle('popup_is-animated');
+  currentContainer.classList.add('popup_is-opened');
+  currentContainer.classList.add('popup_is-animated');
   document.addEventListener('keydown', closePopupBuEsc);
   document.addEventListener('click', closePopupByOverlay);
   currentButtonClose.addEventListener('click', closePopup);
-};
-
-//Дизейбл кнопки формы
-export const disabledButton = (button, marker, popupElements) => {
-  if(marker) {
-    button.classList.add(popupElements.inactiveButtonClass);
-    button.setAttribute('disabled', 'true');
-  } else {
-    button.classList.remove(popupElements.inactiveButtonClass);
-    button.removeAttribute('disabled');
-  };
 };

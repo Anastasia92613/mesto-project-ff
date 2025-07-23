@@ -1,7 +1,7 @@
-import { createCard, deleteCard, hendlerLikeCard } from './components/card.js';
-import { handlePopup } from './components/modal.js';
-import { enableValidation, popupElements } from './components/validation.js';
-import { getCards, getProfile, editProfile, addCard, updateAvatar } from './components/api.js';
+import { createCard, hendlerLikeCard } from './components/card.js';
+import { openPopup, closePopup } from './components/modal.js';
+import { enableValidation, clearValidation } from './components/validation.js';
+import { getCards, getProfile, editProfile, addCard, deletedCard, updateAvatar } from './components/api.js';
 
 const mainContent = document.querySelector('.content')
 
@@ -41,13 +41,28 @@ const containerPlaces = mainContent.querySelector('.places');
 const cardsContainer = containerPlaces.querySelector('.places__list');
 
 //Элементы попапа карточки
- const containerPopupCard = document.querySelector('.popup_type_image');
- const closePopupCard = containerPopupCard.querySelector('.popup__close');
- const titleCard = containerPopupCard.querySelector('.popup__caption');
- const imageCard = containerPopupCard.querySelector('.popup__image');
- const descriptionCard = containerPopupCard.querySelector('.popup__image');
+const containerPopupCard = document.querySelector('.popup_type_image');
+const closePopupCard = containerPopupCard.querySelector('.popup__close');
+const titleCard = containerPopupCard.querySelector('.popup__caption');
+const imageCard = containerPopupCard.querySelector('.popup__image');
+const descriptionCard = containerPopupCard.querySelector('.popup__image');
+const deleteCardPopup = document.querySelector('.popup_type_delete-card');
+const popupClose = deleteCardPopup.querySelector('.popup__close');
 
-const promises = [getProfile, getCards];
+//Глобальная переменная для удаления карточки
+let cardForDelete = {}
+
+//Классы элементов попапа для настройки валидации
+export const popupElements = {
+  formSelector: '.popup__form',
+  inputSelector: '.popup__input',
+  submitButtonSelector: '.popup__button',
+  inactiveButtonClass: 'popup__button_disabled',
+  inputErrorClass: 'popup__input_type_error',
+  errorClass: 'popup__input_error_active'
+};
+
+const promises = [getProfile(), getCards()];
 const preloadText = 'Сохранение...'
 const defaultText = "Сохранить"
 
@@ -69,18 +84,22 @@ Promise.all(promises)
       card._id,
       userId,
       card.owner._id,
-      deleteCard,
+      openedPopupDeletedCard,
       hendlerLikeCard,
       openImage
     )
-  )});
+  )})
+})
+.catch((err) => {
+    console.log('Ошибка при подгрузке карточек', err);
 });
 
 //Открытие и закрытие профиля
 buttonEditProfile.addEventListener('click', () => {
-  handlePopup(containerEditProfile, closeFormProfile);
+  openPopup(containerEditProfile, closeFormProfile);
   nameInput.value = currentName.textContent;
   jobInput.value = currentJob.textContent;
+  clearValidation(containerEditProfile);
 });
 
 //Редактирование профиля
@@ -91,7 +110,7 @@ function handleFormProfileSubmit(evt) {
   .then(profileData => {
     currentName.textContent = profileData.name;
     currentJob.textContent = profileData.about;
-    handlePopup(containerEditProfile, containerEditProfile.querySelector(popupElements.submitButtonSelector));
+    closePopup();
   })
   .catch((err) => {
     console.log('Ошибка при редактировании карточек', err);
@@ -111,7 +130,7 @@ function editAvatar(evt) {
   updateAvatar(linkAvatar.value)
   .then(userData => {
     avatar.setAttribute('style', `background-image: url(${userData.avatar})`);
-    handlePopup(containerEditAvatar, buttonCloseEditAvatar);
+    closePopup();
   })
   .catch((err) => {
     console.log('Ошибка при обновлении аватара', err)
@@ -123,7 +142,8 @@ function editAvatar(evt) {
 
 //Открытие и закрытие редактирования аватара
 avatar.addEventListener('click', () => {
-  handlePopup(containerEditAvatar, buttonCloseEditAvatar);
+  openPopup(containerEditAvatar, buttonCloseEditAvatar);
+  clearValidation(containerEditAvatar);
 });
 
 //Слушатель редактирования аватара
@@ -131,14 +151,17 @@ formAvatar.addEventListener('submit', editAvatar);
 
 //Открытие и закрытие изображения карточки
 const openImage = (evt) => {
-  handlePopup(containerPopupCard, closePopupCard);
+  openPopup(containerPopupCard, closePopupCard);
   imageCard.setAttribute('src', evt.target.src);
   descriptionCard.setAttribute('alt', evt.target.alt);
   titleCard.textContent = evt.target.alt;
 };
 
 //Открытие и закрытие попапа создания новой карточки
-buttonAddCard.addEventListener('click', () => handlePopup(containerNewCard, closeFormNewCard));
+buttonAddCard.addEventListener('click', () => {
+  openPopup(containerNewCard, closeFormNewCard);
+  clearValidation(containerNewCard);
+});
 
 //Обработчик добавления новой карточки
 const handleFormCardSubmit = (evt) => {
@@ -146,8 +169,11 @@ const handleFormCardSubmit = (evt) => {
   buttonNewCardForm.textContent = preloadText;
   addCard(namePlace.value, linkImage.value)
   .then(cardData => {
-    cardsContainer.prepend(createCard(cardData.link, cardData.name, cardData.likes, card._id, cardData.owner._id, cardData.owner._id, deleteCard, hendlerLikeCard, openImage)); 
-    handlePopup(containerNewCard, closeFormNewCard);
+    cardsContainer.prepend(createCard(cardData.link, cardData.name, cardData.likes, cardData._id, cardData.owner._id, cardData.owner._id, openedPopupDeletedCard, hendlerLikeCard, openImage)); 
+    closePopup();
+  })
+  .catch((err) => {
+    console.log('Ошибка при добавлении новой карточки', err);
   })
    .finally(() => {
     buttonNewCardForm.textContent = defaultText;
@@ -156,6 +182,32 @@ const handleFormCardSubmit = (evt) => {
 
 //Добавление новой карточки
 containerNewCard.addEventListener('submit', handleFormCardSubmit);
+
+//Открытие удаление попапа удаления карточки
+const openedPopupDeletedCard = (cardId, deletedCard) => {
+  openPopup(deleteCardPopup, popupClose);
+    cardForDelete = {
+    id: cardId,
+    deletedCard
+  }
+  deleteCardPopup.addEventListener('submit', handlerDeleteCard);
+};
+
+//Ручка удаления карточки
+const handlerDeleteCard = (evt) => {
+  evt.preventDefault();
+  if(!cardForDelete.deletedCard) return;
+
+  deletedCard(cardForDelete.id)
+  .then(() => {
+    cardForDelete.deletedCard.remove();
+    closePopup();
+    cardForDelete = {};
+  })
+  .catch((err) => {
+    console.log('Ошибка при удалении карточки', err);
+  });
+};
 
 //Вызов функции валидации полей формыы
 enableValidation(popupElements);

@@ -7,21 +7,18 @@ const config = {
 };
 
 //Получение данных пользователя
-export const getProfile = new Promise ((resolve, reject) => {
+export const getProfile = () => {
     return fetch(`${config.baseUrl}/users/me`, {
         method: 'GET',
         headers: config.headers
     })
     .then(res => {
         if(res.ok) {
-            resolve(res.json());
+           return res.json();
         }
-        reject(`Ошибка при подгрузке данных профиля: ${res.status}`);
+        return Promise.reject(`Ошибка при подгрузке данных профиля: ${res.status}`);
     })
-    .catch((err) => {
-        console.log('Ошибка при подгрузке карточек', err);
-    });
-});
+};
 
 //Редактирование данных пользователя
 export const editProfile = (name, about) => {
@@ -38,9 +35,6 @@ export const editProfile = (name, about) => {
             return res.json();
         }
         return Promise.reject(`Ошибка при редактировании данных профиля: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log('Ошибка при редактировании карточек', err);
     });
 };
 
@@ -58,28 +52,22 @@ export const updateAvatar = (avatar) => {
             return res.json();
         }
         return Promise.reject(`Ошибка обновления аватара: ${res.status}`);
-    })
-    .catch((err) => {
-        console.log('Ошибка обновления аватара', err);
     });
 };
 
 //Получение карточек
-export const getCards = new Promise((resolve, reject) => {
+export const getCards = () => {
   return fetch(`${config.baseUrl}/cards`, {
     method: 'GET',
     headers: config.headers
   })
    .then(res => {
     if (res.ok) {
-        resolve(res.json());
+        return res.json();
     }
-      reject(`Ошибка при подгрузке карточек': ${res.status}`);
+      return Promise.reject(`Ошибка при подгрузке карточек': ${res.status}`);
    })
-   .catch((err) => {
-     console.log('Ошибка при подгрузке карточек', err);
-    }); 
-});
+};
 
 //Добавление карточки
 export const addCard = (name, link) => {
@@ -96,9 +84,6 @@ export const addCard = (name, link) => {
             return res.json();
         }
         return Promise.reject(`Ошибка при добавлении новой карточки: ${res.status}`);
-    })
-    .catch((err) => {
-      console.log('Ошибка при добавлении новой карточки', err);
     });
 };
 
@@ -113,10 +98,7 @@ export const deletedCard = (cardId) => {
             return res.json();
         }
         return Promise.reject(`Ошибка при удалении карточки: ${res.status}`)
-    })
-    .catch((err) => {
-        console.log('Ошибка при удалении карточки', err);
-    })
+    });
 };
 
 //Проставление лайка карточки
@@ -130,10 +112,7 @@ export const putLikeCard = (cardId) => {
             return res.json();
         }
         return Promise.reject(`Ошибка проставления лайка карточки: ${res.status}`)
-    })
-    .catch((err) => {
-        console.log('Ошибка проставления лайка карточки', err);
-    })
+    });
 };
 
 //Удаление лайка карточки
@@ -147,8 +126,5 @@ export const deleteLikeCard = (cardId) => {
             return res.json();
         }
         return Promise.reject(`Ошибка удаления лайка карточки: ${res.status}`)
-    })
-    .catch((err) => {
-        console.log('Ошибка удаления лайка карточки', err);
-    })
-}
+    });
+};

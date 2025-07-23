@@ -1,14 +1,4 @@
-import { disabledButton } from "../components/modal.js";
-
-//Классы элементов попапа для настройки валидации
-export const popupElements = {
-  formSelector: '.popup__form',
-  inputSelector: '.popup__input',
-  submitButtonSelector: '.popup__button',
-  inactiveButtonClass: 'popup__button_disabled',
-  inputErrorClass: 'popup__input_type_error',
-  errorClass: 'popup__input_error_active'
-};
+import { popupElements } from "../index.js";
 
 // Добавление класса и сообщения с ошибкой на инпут формы
 const showInputError = (formElement, inputElement, errorMessage, popupElements) => {
@@ -33,10 +23,10 @@ export const hideInputError = (formElement, inputElement, popupElements) => {
 };
 
 //Функция очищения полей после валидации
-export const clearValidation = (formElement, popupElements) => {
+export const clearValidation = (formElement) => {
 
     if(formElement) {
-        const inputList = Array.from(formElement.querySelectorAll(popupElements.inputSelector));
+        const inputList = Array.from(formElement.querySelectorAll('.popup__input'));
         inputList.forEach((inputElement) => {
         hideInputError(formElement, inputElement, popupElements);
         });
@@ -50,13 +40,12 @@ export const clearValidation = (formElement, popupElements) => {
 
 // Функция, которая проверяет валидность инпута формы
  export const checkInputValidity = (formElement, inputElement, popupElements) => {
-  const regex = /^[a-zA-Zа-яА-ЯёЁ\s-]+$/u;
-  const regexFields = ["popup__input_name", "popup__input_description", "popup__input_card-name"];
-  
-  if (!inputElement.validity.valid) {
+    if (!inputElement.validity.valid) {
     showInputError(formElement, inputElement, inputElement.validationMessage, popupElements);
-  } else if (regexFields.includes(inputElement.id) && !regex.test(inputElement.value)) {
-    showInputError(formElement, inputElement, "Разрешены только латинские, кириллические буквы, знаки дефиса и пробелы", popupElements);
+  } 
+  if (inputElement.validity.patternMismatch) {
+   console.log(inputElement.dataset.errorMessage);
+   showInputError(formElement, inputElement, inputElement.dataset.errorMessage, popupElements);
   } else {
     hideInputError(formElement, inputElement, popupElements);
   }
@@ -81,4 +70,15 @@ export const enableValidation = (popupElements) => {
     });
     setEventListeners(formElement, popupElements);
   });
+};
+
+//Дизейбл кнопки формы
+const disabledButton = (button, marker, popupElements) => {
+  if(marker) {
+    button.classList.add(popupElements.inactiveButtonClass);
+    button.setAttribute('disabled', 'true');
+  } else {
+    button.classList.remove(popupElements.inactiveButtonClass);
+    button.removeAttribute('disabled');
+  };
 };
