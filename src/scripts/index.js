@@ -96,10 +96,10 @@ Promise.all(promises)
 
 //Открытие и закрытие профиля
 buttonEditProfile.addEventListener('click', () => {
+  clearValidation(formProfile, popupElements);
   openPopup(containerEditProfile, closeFormProfile);
   nameInput.value = currentName.textContent;
   jobInput.value = currentJob.textContent;
-  clearValidation(containerEditProfile);
 });
 
 //Редактирование профиля
@@ -143,7 +143,7 @@ function editAvatar(evt) {
 //Открытие и закрытие редактирования аватара
 avatar.addEventListener('click', () => {
   openPopup(containerEditAvatar, buttonCloseEditAvatar);
-  clearValidation(containerEditAvatar);
+  clearValidation(formAvatar, popupElements);
 });
 
 //Слушатель редактирования аватара
@@ -160,7 +160,7 @@ const openImage = (evt) => {
 //Открытие и закрытие попапа создания новой карточки
 buttonAddCard.addEventListener('click', () => {
   openPopup(containerNewCard, closeFormNewCard);
-  clearValidation(containerNewCard);
+  clearValidation(formNewCard, popupElements);
 });
 
 //Обработчик добавления новой карточки
