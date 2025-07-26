@@ -42,6 +42,7 @@ export const clearValidation = (formElement, popupElements) => {
         inputList.forEach((inputElement) => {
             hideInputError(formElement, inputElement, popupElements);
             formElement.reset();
+            toggleDisabledButton(inputList, formElement.querySelector(popupElements.submitButtonSelector), popupElements);
         });      
     };
 };
