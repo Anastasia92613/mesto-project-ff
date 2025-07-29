@@ -41,9 +41,9 @@ export const clearValidation = (formElement, popupElements) => {
         const inputList = Array.from(formElement.querySelectorAll('.popup__input'));
         inputList.forEach((inputElement) => {
             hideInputError(formElement, inputElement, popupElements);
-            formElement.reset();
-            toggleDisabledButton(inputList, formElement.querySelector(popupElements.submitButtonSelector), popupElements);
-        });      
+        });
+        formElement.reset();
+        toggleDisabledButton(inputList, formElement.querySelector(popupElements.submitButtonSelector), popupElements);     
     };
 };
 
